@@ -11,7 +11,7 @@ from geometry_msgs.msg import Twist, Point, PoseStamped, Pose2D
 from nav_msgs.msg import Path, Odometry
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool
-from math import fabs, sqrt, atan2, pi, fmod
+from math import fabs, sqrt, atan2, pi, fmod, dist
 
 from copy import deepcopy
 
@@ -232,10 +232,16 @@ class LocalPlanner(Node):
             Return a tuple (distance, angle) with distance and angle to the target
         """           
         if len(self.pathPoses) > 0:
-            
+            curPose = self.curPose2D
+            c = [curPose.x, curPose.y]
+
+            tgtPose = self.pathPoses[0]
+            t = [tgtPose.x, tgtPose.y]
             
             #TODO for students : calculate distCurTarget and angle. To compute shortest angle use method shortestAngleDiff defined before
-
+            distCurTarget = dist(c, t)
+            
+            angle = self.shortest_angle_diff(curPose.theta, tgtPose.theta)
 
             return (distCurTarget, angle)
         else:
@@ -247,10 +253,11 @@ class LocalPlanner(Node):
             Return an angle (float)
         """
         if len(self.pathPoses) > 0:
-
+            curPose = self.curPose2D
+            tgtPose = self.pathPoses[0]
 
             #TODO for students : calculate angle . To compute shortest angle use method shortestAngleDiff defined before
-
+            angle = self.shortest_angle_diff(curPose.theta, tgtPose.theta)
 
 
             return angle       
