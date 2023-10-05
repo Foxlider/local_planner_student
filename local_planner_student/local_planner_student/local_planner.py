@@ -127,6 +127,8 @@ class LocalPlanner(Node):
         
         #TODO for students : Fill in self.curPose2D (help : use euler_from_quaternion)
 
+        self.curPose2D = euler_from_quaternion([odom.pose.x, odom.pose.y, odom.pose.w])[2]
+
 
     def scan_callback(self, scan):
         """
@@ -135,6 +137,10 @@ class LocalPlanner(Node):
         """        
         
         #TODO for students : If an obstacle below self.Obstacle_range if detected, then self.isObstacle = True, False otherwise
+        if scan.range_min < self.Obstacle_range :
+            self.isObstacle = True
+        else :
+            self.isObstacle = False
 
 
 
