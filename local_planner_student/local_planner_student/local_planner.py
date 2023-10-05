@@ -269,14 +269,14 @@ class LocalPlanner(Node):
             # computeVelocity
             self.get_logger().info("# New goal : x=%f ; y=%f"  % (self.pathPoses[0].pose.position.x, self.pathPoses[0].pose.position.y))
             
-            return ""   #TODO for students : return string matching with the state
+            return "New Goal"   #TODO for students : return string matching with the state
 
 
         elif (dist < self.Destination_eps) and len(self.pathPoses) == 1:
             if fabs(finalOrientation) >= self.Angle_eps:
-                state = ""  #TODO for students : return string matching with the state
+                state = "Last Goal position Reached"  #TODO for students : return string matching with the state
             else:
-                state = ""  #TODO for students : return string matching with the state
+                state = "Last Goal pose (position + orientation) Reached"  #TODO for students : return string matching with the state
 
             self.get_logger().info("# %s : X = %.2f ; Y = %.2f "  % (state, self.pathPoses[0].pose.position.x, self.pathPoses[0].pose.position.y))
             return state
@@ -290,19 +290,20 @@ class LocalPlanner(Node):
             :param angle: Angle to the waypoint
             :param goalState: string giving the state from the path_sequencer method
             :rtype: geometry_msgs.msg/Twist
+            Available states:"New Goal", "Reach in progress",  "Last Goal position Reached", "Last Goal pose (position + orientation) Reached"
         """
         twist = Twist()
 
-        twist.angular.z = 0 #TODO for students : Change 0 with gain and saturation (both ROSPARAM) applied to angle (as already done for linear velocity)
+        twist.angular.z = min(dist * self.K_angular, self.Sat_angular) #TODO for students : Change 0 with gain and saturation (both ROSPARAM) applied to angle (as already done for linear velocity)
 
         if fabs(angle) < self.Angle_to_allow_linear:
-            if goalState == "" or goalState == "":  #TODO for students : modify string matching with the state (help in pathSequencer docstring)  
+            if goalState == "New Goal" or goalState == "Reach in progress":  #TODO for students : modify string matching with the state (help in pathSequencer docstring)  
                 if self.isObstacle:
                     twist.linear.x = 0.0
                 else:
                     twist.linear.x = min(dist * self.K_linear, self.Sat_linear)   
 
-        if goalState == "": #TODO for students : modify string matching with the state (help in pathSequencer docstring)
+        if goalState == "Last Goal pose (position + orientation) Reached": #TODO for students : modify string matching with the state (help in pathSequencer docstring)
             twist.angular.z = 0.0
 
         return twist   
@@ -329,10 +330,10 @@ class LocalPlanner(Node):
 
         goalState = self.path_sequencer(dist, angle, finalOrientation)
 
-        if goalState == "": #TODO for students : modify string matching with the state (help in pathSequencer docstring)        
+        if goalState == "New Goal": #TODO for students : modify string matching with the state (help in pathSequencer docstring)        
             (dist, angle) = self.compute_dist_angle()
 
-        elif goalState == "" or goalState == "":    #TODO for students : modify string matching with the state (help in pathSequencer docstring)        
+        elif goalState == "Reach in progress" or goalState == "Last Goal position Reached":    #TODO for students : modify string matching with the state (help in pathSequencer docstring)        
             angle = finalOrientation
 
         twist = self.compute_velocity(dist, angle, goalState)
